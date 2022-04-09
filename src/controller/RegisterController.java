@@ -1,7 +1,9 @@
 package controller;
 
-import crypt.AES;
-import data.*;
+import crypt.SHA256Hasher;
+import data.ObjectReader;
+import data.ObjectWriter;
+import data.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -10,11 +12,16 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import model.Main;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.HashMap;
 
 public class RegisterController {
     private Main model;
-    private AES aes;
+    private HashMap<String, User> map;
+    private File file;
+    private ObjectReader csvReader;
+    private ObjectWriter objectWriter;
+    private SHA256Hasher sha256Hasher;
 
     @FXML
     private TextField inputUsername;
@@ -28,21 +35,15 @@ public class RegisterController {
     @FXML
     void register(ActionEvent event) {
         try {
-            Writer csvWriter = new CSVWriter();
-            Reader csvReader = new CSVReader();
-            ArrayList<User> list = new ArrayList<>();
+            objectWriter = new ObjectWriter();
+            csvReader = new ObjectReader();
+            file = new File("files/users.enc");
+            map = new HashMap<>();
+            sha256Hasher = new SHA256Hasher();
 
             if (checkInput()) {
-                if (csvReader.readUsers("users.enc") != null)
-                    list = csvReader.readUsers("users.enc");
-
-                User u = new User(inputUsername.getText(), aes.encrypt(inputPwd1.getText()), aes.getKey(), aes.getEncryptionCipher());
-                list.add(u);
-                csvWriter.appendUser(list,"users.enc");
-
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "New user registered! \uD83D\uDE01\t", ButtonType.FINISH);
-                alert.showAndWait();
-
+                fetchData();
+                storeData(sha256Hasher);
                 model.loadLogin();
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "please check if the passwords are matching!", ButtonType.FINISH);
@@ -51,6 +52,21 @@ public class RegisterController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void fetchData() {
+        if (file.length() != 0)
+            map = csvReader.readUsers("files/users.enc");
+    }
+
+    private void storeData(SHA256Hasher sha256Hasher) throws Exception {
+        //TODO: Später isRegistered auf false setzen!
+        User u = new User(inputUsername.getText(), sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd1.getText())), true);
+        map.put(u.getName(), u);
+        objectWriter.appendUser(map,"files/users.enc");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, "New user registered! \uD83D\uDE01\t", ButtonType.FINISH);
+        alert.showAndWait();
     }
 
     private boolean checkInput() {
@@ -66,7 +82,4 @@ public class RegisterController {
         this.model = model;
     }
 
-    public void setAES(AES aes) {
-        this.aes = aes;
-    }
 }

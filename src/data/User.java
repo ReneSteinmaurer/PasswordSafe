@@ -1,24 +1,21 @@
 package data;
 
-import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import java.io.Serializable;
 
 public class User implements Serializable {
     private String name;
     private String pwd;
-    private SecretKey key;
-    private Cipher encryptionCipher;
+    private boolean isRegistered;
 
     public User() {
-        this (null,null,null,null);
+        this (null,null, false);
     }
 
-    public User(String name, String pwd, SecretKey key, Cipher encryptionCipher) {
+    public User(String name, String pwd, boolean isRegistered) {
         this.name = name;
         this.pwd = pwd;
-        this.key = key;
-        this.encryptionCipher = encryptionCipher;
+        this.isRegistered = isRegistered;
     }
 
     public String getName() {
@@ -37,20 +34,12 @@ public class User implements Serializable {
         this.pwd = pwd;
     }
 
-    public SecretKey getKey() {
-        return key;
+    public boolean isRegistered() {
+        return isRegistered;
     }
 
-    public void setKey(SecretKey key) {
-        this.key = key;
-    }
-
-    public Cipher getEncryptionCipher() {
-        return encryptionCipher;
-    }
-
-    public void setEncryptionCipher(Cipher encryptionCipher) {
-        this.encryptionCipher = encryptionCipher;
+    public void setRegistered(boolean registered) {
+        isRegistered = registered;
     }
 
     @Override
@@ -58,7 +47,6 @@ public class User implements Serializable {
         return "User{" +
                 "name='" + name + '\'' +
                 ", pwd='" + pwd + '\'' +
-                ", key=" + key +
                 '}';
     }
 }

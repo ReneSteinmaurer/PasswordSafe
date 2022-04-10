@@ -9,10 +9,15 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import model.Main;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -93,20 +98,14 @@ public class ApplicationController implements Initializable {
         else name = "";
 
         if (checkInput()) {
-            if (!savedEntries.containsKey(nameField.getText())) {
-                if (isNew) {
-                    putEntry(nameField.getText());
-                    isNew = false;
-                } else if (savedEntries.containsKey(name)) {
-                    editEntry();
-                }
-            } else {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, nameField.getText() + " already exists!", ButtonType.APPLY);
-                alert.showAndWait();
-                clearFields();
+            if (isNew) {
+                putEntry(nameField.getText());
+                isNew = false;
+            } else if (savedEntries.containsKey(name)) {
+                editEntry();
             }
-
         }
+
         buttonAdd.setDisable(false);
         buttonEdit.setDisable(false);
         buttonDelete.setDisable(false);
@@ -172,11 +171,29 @@ public class ApplicationController implements Initializable {
     }
 
     @FXML
+    void copyToClipboard(ActionEvent event) {
+        String pwd;
+        StringSelection ss;
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        if (scrollView.getSelectionModel().getSelectedItem() != null) {
+            pwd = savedEntries.get(scrollView.getSelectionModel().getSelectedItem()).getPassword();
+
+            ss = new StringSelection(pwd);
+            clipboard.setContents(ss, null);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "something went wrong", ButtonType.OK);
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
     void deleteCurrentEntry(ActionEvent event) {
         if (scrollView.getSelectionModel().getSelectedItem() != null) {
             observableList.remove(scrollView.getSelectionModel().getSelectedItem());
             savedEntries.remove(scrollView.getSelectionModel().getSelectedItem());
             writer.writeEntries(savedEntries, FILE_PATH);
+            clearFields();
         }
 
         listProperty.set(FXCollections.observableArrayList(observableList));
@@ -184,25 +201,36 @@ public class ApplicationController implements Initializable {
 
     @FXML
     void editCurrentEntry(ActionEvent event) {
+        String name = scrollView.getSelectionModel().getSelectedItem();
+        if (savedEntries.containsKey(name))
+            pwdField.setText(savedEntries.get(name).getPassword());
+
         enableFields();
         isNew = false;
         buttonApply.setDisable(false);
         buttonAdd.setDisable(true);
         buttonEdit.setDisable(true);
         buttonDelete.setDisable(true);
+        scrollView.setDisable(true);
         buttonGenerate.setDisable(false);
         buttonChangeVisibility.setDisable(false);
         specialChars.setDisable(false);
+
     }
 
     @FXML
     void generatePwd(ActionEvent event) {
         int length;
-        if (lengthField.getText().isBlank() || (length = Integer.parseInt(lengthField.getText())) < 1)
-            length = 15;
+        if (lengthField.getText().matches("[0-9]+") || lengthField.getText().isBlank()) {
+            if (lengthField.getText().isBlank()) length = 15;
+            else length = Integer.parseInt(lengthField.getText());
 
-        if (specialChars.isSelected()) generateWithSpecialChars(length);
-        else generateWithoutSpecialChars(length);
+            if (specialChars.isSelected()) generateWithSpecialChars(length);
+            else generateWithoutSpecialChars(length);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "only numbers in length field!", ButtonType.OK);
+            alert.showAndWait();
+        }
     }
 
     private void generateWithoutSpecialChars(int length) {
@@ -215,11 +243,9 @@ public class ApplicationController implements Initializable {
             sb.append(chars[r.nextInt(key.length())]);
         }
         pwdField.setText(sb.toString());
-        System.out.println(sb.toString());
     }
 
     private void generateWithSpecialChars(int length) {
-        char[] chars = new char[length];
         Random r = new Random();
         StringBuilder sb = new StringBuilder();
 
@@ -229,8 +255,6 @@ public class ApplicationController implements Initializable {
         }
 
         pwdField.setText(sb.toString());
-
-        System.out.println(sb);
     }
 
     @FXML
@@ -240,7 +264,7 @@ public class ApplicationController implements Initializable {
         if (entry != null) {
             nameField.setText(entry.getName());
             usernameField.setText(entry.getUsername());
-            pwdField.setText(entry.getPassword());
+            pwdField.setText("********");
             urlField.setText(entry.getUrl());
             disableFields();
         } else {

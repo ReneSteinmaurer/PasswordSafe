@@ -2,7 +2,7 @@ package model;
 
 import controller.ApplicationController;
 import controller.LoginController;
-import controller.MessageController;
+import controller.PermissionController;
 import controller.RegisterController;
 import crypt.FileEncoder;
 import data.ObjectReader;
@@ -36,7 +36,7 @@ public class Main extends Application {
     private LoginController loginController;
     private RegisterController registerController;
     private ApplicationController applicationController;
-    private MessageController messageController;
+    private PermissionController messageController;
 
     private HashMap<String, SavedEntry> entryHashMap = new HashMap<>();
 
@@ -46,61 +46,31 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         stage = primaryStage;
-
-        try {
-            System.out.println("Stage is starting");
-            // Display message
-            System.out.println("/****AES Decryption*******/");
-
-            // Placing the PDF path
-            String pFileName = FILE_PATH;
-            String cFileName = "files/data.enc";
-
-            // Placing the PDF name
-            String decFileName = FILE_PATH;
-
-            // Creating cipher key 56 bit key length
-            byte[] cipher_key = "12345678901234561234567890123456".getBytes("UTF-8");
-            FileEncoder.decryptEcb(cFileName, decFileName, cipher_key);
-
-            // Print and display the file credentials
-            System.out.println(
-                    "file of encryption: " + pFileName + "\n"
-                            + "created encrypted file  : " + cFileName
-                            + "\n"
-                            + "created decrypted file  : " + decFileName);
-
-            loadLogin();
-        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
+        loadLogin();
     }
 
     @Override
     public void stop() {
         try {
-            System.out.println("Stage is closing");
             // Display message
-            System.out.println("/****AES Encryption*******/");
+            System.out.println("********* Encrypting file...");
 
-            // Placing the PDF path
+            // Placing the path
             String pFileName = FILE_PATH;
             String cFileName = "files/data.enc";
 
-            // Placing the PDF name
+            // Placing the name
             String decFileName = FILE_PATH;
 
             // Creating cipher key 56 bit key length
-            byte[] cipher_key = "12345678901234561234567890123456".getBytes("UTF-8");
-            FileEncoder.encryptEcb(pFileName, cFileName, cipher_key);
+            byte[] cipher_key = "10375678801234561234557690120456".getBytes("UTF-8");
 
-            Files.delete(Path.of(FILE_PATH));
-            // Print and display the file credentials
-            System.out.println(
-                    "file of encryption: " + pFileName + "\n"
-                            + "created encrypted file  : " + cFileName
-                            + "\n"
-                            + "created decrypted file  : " + decFileName);
+            if (Files.exists(Path.of(FILE_PATH))) {
+                FileEncoder.encryptEcb(pFileName, cFileName, cipher_key);
+                Files.delete(Path.of(FILE_PATH));
+            } else {
+                System.out.println("file not found!");
+            }
         } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             e.printStackTrace();
         }
@@ -128,6 +98,7 @@ public class Main extends Application {
     public void loadRegister() {
 
         try {
+            stage.close();
             stage = new Stage();
             loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("../view/register.fxml"));
@@ -172,7 +143,7 @@ public class Main extends Application {
         try {
             Stage msgStage = new Stage();
             loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("../view/messages.fxml"));
+            loader.setLocation(getClass().getResource("../view/permissions.fxml"));
             root = loader.load();
             msgStage.setTitle("Messages");
             scene = new Scene(root);

@@ -7,15 +7,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MessageController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PermissionController">
    <children>
-      <Label layoutX="248.0" layoutY="14.0" text="Messages">
+      <Label layoutX="248.0" layoutY="14.0" text="Permissions">
          <font>
             <Font size="24.0" />
          </font>
       </Label>
-      <ListView fx:id="usersView" layoutX="48.0" layoutY="100.0" onMouseClicked="#onMouseClicked" prefHeight="253.0" prefWidth="200.0" />
-      <Button layoutX="345.0" layoutY="242.0" mnemonicParsing="false" onAction="#togglePermission" style="-fx-background-color: #FFBF00;" text="toggle permission">
+      <ListView fx:id="usersView" layoutX="48.0" layoutY="100.0" onMouseClicked="#onMouseClicked" prefHeight="253.0" prefWidth="200.0" stylesheets="@style.css" />
+      <Button layoutX="271.0" layoutY="243.0" mnemonicParsing="false" onAction="#togglePermission" style="-fx-background-color: #FFBF00;" text="toggle permission">
          <font>
             <Font size="16.0" />
          </font>
@@ -35,5 +35,10 @@
             <Font size="16.0" />
          </font>
       </Label>
+      <Button layoutX="484.0" layoutY="243.0" mnemonicParsing="false" onAction="#deleteUser" prefHeight="37.0" prefWidth="79.0" style="-fx-background-color: #ff355e;" text="delete">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

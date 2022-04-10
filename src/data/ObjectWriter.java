@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class ObjectWriter implements Writer {
 
     @Override
-    public void appendUser(HashMap<String, User> list, String file) {
+    public void writeUsers(HashMap<String, User> list, String file) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeInt(list.size());
 

@@ -69,7 +69,7 @@ public class RegisterController {
                 sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd1.getText(), salt)), salt, false);
 
         map.put(u.getName(), u);
-        objectWriter.appendUser(map,"files/users.enc");
+        objectWriter.writeUsers(map,"files/users.enc");
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION, "New user registered! \uD83D\uDE01\t", ButtonType.FINISH);
         alert.showAndWait();

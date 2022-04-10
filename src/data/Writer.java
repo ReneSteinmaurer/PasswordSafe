@@ -6,6 +6,6 @@ public interface Writer {
 
     //void appendUser(User u, String file);
 
-    void appendUser(HashMap<String, User> list, String file);
+    void writeUsers(HashMap<String, User> list, String file);
     void writeEntries(HashMap<String, SavedEntry> map, String file);
 }

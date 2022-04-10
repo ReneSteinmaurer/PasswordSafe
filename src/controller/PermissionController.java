@@ -10,6 +10,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -20,7 +22,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
-public class MessageController implements Initializable {
+public class PermissionController implements Initializable {
     private final String FILE_PATH = "files/users.enc";
     private Main main;
     private HashMap<String, User> userHashMap;
@@ -51,7 +53,7 @@ public class MessageController implements Initializable {
                 }
             }
         }
-        objectWriter.appendUser(userHashMap, FILE_PATH);
+        objectWriter.writeUsers(userHashMap, FILE_PATH);
     }
 
     @FXML
@@ -68,6 +70,25 @@ public class MessageController implements Initializable {
 
         } else permissionField.clear();
 
+
+    }
+
+    @FXML
+    void deleteUser(ActionEvent event) {
+        User entry = null;
+        if (!usersView.getSelectionModel().getSelectedItem().isEmpty())
+            entry = userHashMap.get(usersView.getSelectionModel().getSelectedItem());
+
+        if (entry != null && userHashMap.containsKey(entry.getName()) && list.contains(entry.getName())) {
+            userHashMap.remove(entry.getName());
+            list.remove(entry.getName());
+
+            listProperty.set(FXCollections.observableArrayList(list));
+            objectWriter.writeUsers(userHashMap, FILE_PATH);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "something went wrong", ButtonType.OK);
+            alert.showAndWait();
+        }
 
     }
 

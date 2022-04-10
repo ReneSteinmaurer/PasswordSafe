@@ -6,7 +6,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class SHA256Hasher {
-    public byte[] getSHA(String input) throws NoSuchAlgorithmException {
+    public byte[] getSHA(String input, String salt) throws NoSuchAlgorithmException {
+        input += salt;
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         return md.digest(input.getBytes(StandardCharsets.UTF_8));
     }

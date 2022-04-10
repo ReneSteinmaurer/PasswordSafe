@@ -9,19 +9,20 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import model.Main;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.ResourceBundle;
 
 public class ApplicationController implements Initializable {
+    private final String FILE_PATH = "files/data.obj";
+    private boolean isNew = false;
+
     private Main model;
     private HashMap<String, SavedEntry> savedEntries = new HashMap<>();
 
@@ -73,6 +74,8 @@ public class ApplicationController implements Initializable {
     void addEntry(ActionEvent event) {
         clearFields();
         enableFields();
+        isNew = true;
+
         buttonAdd.setDisable(true);
         buttonEdit.setDisable(true);
         buttonDelete.setDisable(true);
@@ -81,22 +84,28 @@ public class ApplicationController implements Initializable {
         buttonGenerate.setDisable(false);
         specialChars.setDisable(false);
         scrollView.setDisable(true);
-
     }
 
     @FXML
     void apply(ActionEvent event) {
-        String name = scrollView.getSelectionModel().getSelectedItem();
-        if (checkInput()) {
-            if (savedEntries.containsKey(name)) {
-                SavedEntry entry = new SavedEntry(nameField.getText(),usernameField.getText(),pwdField.getText(),urlField.getText());
-                savedEntries.put(nameField.getText(), entry);
-                savedEntries.remove(name);
+        String name;
+        if (!isNew) name = scrollView.getSelectionModel().getSelectedItem();
+        else name = "";
 
-                writer.writeEntries(savedEntries,"files/data.obj");
-                observableList.set(scrollView.getSelectionModel().getSelectedIndex(), nameField.getText());
-                listProperty.set(FXCollections.observableArrayList(observableList));
-            } else saveData();
+        if (checkInput()) {
+            if (!savedEntries.containsKey(nameField.getText())) {
+                if (isNew) {
+                    putEntry(nameField.getText());
+                    isNew = false;
+                } else if (savedEntries.containsKey(name)) {
+                    editEntry();
+                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, nameField.getText() + " already exists!", ButtonType.APPLY);
+                alert.showAndWait();
+                clearFields();
+            }
+
         }
         buttonAdd.setDisable(false);
         buttonEdit.setDisable(false);
@@ -109,22 +118,47 @@ public class ApplicationController implements Initializable {
         disableFields();
     }
 
+    private void editEntry() {
+        String name = scrollView.getSelectionModel().getSelectedItem();
+        if (!name.isEmpty()) {
+            savedEntries.remove(name);
+
+            savedEntries.put(nameField.getText(),
+                    new SavedEntry(nameField.getText(), usernameField.getText(), pwdField.getText(), urlField.getText()));
+
+            writer.writeEntries(savedEntries, FILE_PATH);
+
+            observableList.remove(name);
+            observableList.add(nameField.getText());
+            listProperty.set(FXCollections.observableArrayList(observableList));
+        }
+    }
+
+
+    private void putEntry(String name) {
+        SavedEntry entry = null;
+        if (!name.isBlank())
+            entry = new SavedEntry(nameField.getText(), usernameField.getText(), pwdField.getText(), urlField.getText());
+        if (entry != null) {
+            savedEntries.put(name, entry);
+
+            writer.writeEntries(savedEntries, FILE_PATH);
+            observableList.add(name);
+            listProperty.set(FXCollections.observableArrayList(observableList));
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "You need to fill out the fields", ButtonType.APPLY);
+            alert.showAndWait();
+        }
+
+
+    }
+
     private void clearFields() {
         nameField.clear();
         usernameField.clear();
         pwdField.clear();
         urlField.clear();
         lengthField.clear();
-    }
-
-    private void saveData() {
-        SavedEntry savedEntry = new SavedEntry(nameField.getText(), usernameField.getText(), pwdField.getText(), urlField.getText());
-        savedEntries.put(nameField.getText(), savedEntry);
-
-        writer.writeEntries(savedEntries,"files/data.obj");
-
-        observableList.add(nameField.getText());
-        listProperty.set(FXCollections.observableArrayList(observableList));
     }
 
     private boolean checkInput() {
@@ -142,19 +176,23 @@ public class ApplicationController implements Initializable {
         if (scrollView.getSelectionModel().getSelectedItem() != null) {
             observableList.remove(scrollView.getSelectionModel().getSelectedItem());
             savedEntries.remove(scrollView.getSelectionModel().getSelectedItem());
+            writer.writeEntries(savedEntries, FILE_PATH);
         }
 
-        writer.writeEntries(savedEntries, "files/data.obj");
         listProperty.set(FXCollections.observableArrayList(observableList));
     }
 
     @FXML
     void editCurrentEntry(ActionEvent event) {
         enableFields();
+        isNew = false;
         buttonApply.setDisable(false);
         buttonAdd.setDisable(true);
         buttonEdit.setDisable(true);
         buttonDelete.setDisable(true);
+        buttonGenerate.setDisable(false);
+        buttonChangeVisibility.setDisable(false);
+        specialChars.setDisable(false);
     }
 
     @FXML
@@ -186,7 +224,7 @@ public class ApplicationController implements Initializable {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < length; i++) {
-            char c = (char) ((char) r.nextInt(126-33)+33);
+            char c = (char) ((char) r.nextInt(126 - 33) + 33);
             sb.append(c);
         }
 
@@ -199,11 +237,15 @@ public class ApplicationController implements Initializable {
     void onMouseClicked(MouseEvent event) {
         SavedEntry entry = savedEntries.get(scrollView.getSelectionModel().getSelectedItem());
 
-        nameField.setText(entry.getName());
-        usernameField.setText(entry.getUsername());
-        pwdField.setText(entry.getPassword());
-        urlField.setText(entry.getUrl());
-        disableFields();
+        if (entry != null) {
+            nameField.setText(entry.getName());
+            usernameField.setText(entry.getUsername());
+            pwdField.setText(entry.getPassword());
+            urlField.setText(entry.getUrl());
+            disableFields();
+        } else {
+            clearFields();
+        }
     }
 
     private void disableFields() {
@@ -223,8 +265,6 @@ public class ApplicationController implements Initializable {
     }
 
 
-
-
     public void setModel(Main model) {
         this.model = model;
     }
@@ -239,6 +279,11 @@ public class ApplicationController implements Initializable {
             observableList.add(s);
         }
         listProperty.set(FXCollections.observableArrayList(observableList));
+    }
+
+    @FXML
+    void onMessages(ActionEvent event) throws IOException {
+        model.loadMessages();
     }
 
     @Override

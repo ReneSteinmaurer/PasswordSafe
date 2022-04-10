@@ -4,7 +4,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollBar?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
@@ -62,7 +61,6 @@
          </font>
       </Label>
       <TextField fx:id="urlField" layoutX="543.0" layoutY="392.0" prefHeight="25.0" prefWidth="231.0" />
-      <ScrollBar layoutX="325.0" layoutY="177.0" orientation="VERTICAL" prefHeight="424.0" prefWidth="14.0" />
       <Button fx:id="buttonApply" layoutX="382.0" layoutY="466.0" mnemonicParsing="false" onAction="#apply" text="Apply">
          <font>
             <Font size="14.0" />
@@ -79,5 +77,9 @@
             <Font size="16.0" />
          </font>
       </CheckBox>
+      <Button id="messages" layoutX="700.0" layoutY="14.0" mnemonicParsing="false" onAction="#onMessages" style="-fx-background-color: #FFBF00;" stylesheets="@style.css" text="Messages">
+         <font>
+            <Font size="14.0" />
+         </font></Button>
    </children>
 </AnchorPane>

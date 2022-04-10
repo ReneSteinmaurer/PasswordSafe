@@ -2,8 +2,14 @@
     -fx-background-image: url('icon_eye.png');
 }
 
+.messages {
+    -fx-background-color: #FFBF00;
+}
+
+
 .list-cell{
     -fx-font-size:16.0;
 }
+
 
 

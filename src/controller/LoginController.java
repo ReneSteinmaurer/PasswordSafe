@@ -7,10 +7,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import model.Main;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 public class LoginController {
@@ -21,7 +21,7 @@ public class LoginController {
     private TextField inputUsername;
 
     @FXML
-    private TextField inputPwd;
+    private PasswordField inputPwd;
 
     @FXML
     void login(ActionEvent event) {
@@ -49,7 +49,9 @@ public class LoginController {
 
     private boolean checkPasswordsMatching(SHA256Hasher sha256Hasher) throws Exception {
         boolean matching = false;
-        String userInput = sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd.getText()));
+        String salt = users.get(inputUsername.getText()).getSalt();
+
+        String userInput = sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd.getText(), salt));
         String pwd = users.get(inputUsername.getText()).getPwd();
 
         if (pwd.equals(userInput))
@@ -68,11 +70,7 @@ public class LoginController {
 
     @FXML
     void register(ActionEvent event) {
-        try {
-            model.loadRegister();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        model.loadRegister();
     }
 
     public void setModel(Main model) {

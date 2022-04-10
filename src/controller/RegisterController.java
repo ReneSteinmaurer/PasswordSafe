@@ -1,6 +1,7 @@
 package controller;
 
 import crypt.SHA256Hasher;
+import crypt.Salter;
 import data.ObjectReader;
 import data.ObjectWriter;
 import data.User;
@@ -22,6 +23,7 @@ public class RegisterController {
     private ObjectReader csvReader;
     private ObjectWriter objectWriter;
     private SHA256Hasher sha256Hasher;
+    private Salter salter;
 
     @FXML
     private TextField inputUsername;
@@ -40,6 +42,7 @@ public class RegisterController {
             file = new File("files/users.enc");
             map = new HashMap<>();
             sha256Hasher = new SHA256Hasher();
+            salter = new Salter();
 
             if (checkInput()) {
                 fetchData();
@@ -61,7 +64,10 @@ public class RegisterController {
 
     private void storeData(SHA256Hasher sha256Hasher) throws Exception {
         //TODO: Später isRegistered auf false setzen!
-        User u = new User(inputUsername.getText(), sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd1.getText())), true);
+        String salt = salter.retrieveCustomSalt();
+        User u = new User(inputUsername.getText(),
+                sha256Hasher.toHexString(sha256Hasher.getSHA(inputPwd1.getText(), salt)), salt, false);
+
         map.put(u.getName(), u);
         objectWriter.appendUser(map,"files/users.enc");
 

@@ -1,20 +1,21 @@
 package data;
 
-import javax.crypto.SecretKey;
 import java.io.Serializable;
 
 public class User implements Serializable {
     private String name;
     private String pwd;
+    private String salt;
     private boolean isRegistered;
 
     public User() {
-        this (null,null, false);
+        this (null,null,null, false);
     }
 
-    public User(String name, String pwd, boolean isRegistered) {
+    public User(String name, String pwd, String salt, boolean isRegistered) {
         this.name = name;
         this.pwd = pwd;
+        this.salt = salt;
         this.isRegistered = isRegistered;
     }
 
@@ -40,6 +41,14 @@ public class User implements Serializable {
 
     public void setRegistered(boolean registered) {
         isRegistered = registered;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 
     @Override
